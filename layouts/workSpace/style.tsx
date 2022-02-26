@@ -137,7 +137,7 @@ export const WorkspaceName = styled.div`
   padding-left: 16px;
   margin: 0;
   color: white;
-    
+  cursor: pointer;
 `;
 
 export const MenuScroll = styled.div`
@@ -192,3 +192,9 @@ export const WorkspaceButton = styled.button`
   color: black;
   cursor: pointer;
 `;
+
+export const RightCenterButton = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+`

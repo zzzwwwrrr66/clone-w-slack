@@ -23,8 +23,12 @@ import {
   WorkspaceModal,
   WorkspaceName,
   WorkspaceList,
-  WorkspaceWrapper, 
+  WorkspaceWrapper,
+  RightCenterButton 
 } from "./style";
+import { Button, Input, Label } from '@pages/signup/styles';
+// ico
+import { BsThreeDotsVertical, BsFillCaretDownFill } from "react-icons/bs";
 
 
   // util 
@@ -43,6 +47,7 @@ import Menu from "@components/menu";
 import Modal from "@components/modal";
 import NewWorkspaceForm from '@layouts/workSpace/NewWorkspaceForm';
 import NewChannelForm from '@layouts/workSpace/NewChannelForm';
+import AddMemberForm from '@layouts/workSpace/AddMemberForm'
 import ChannelList from "@components/channelList";
 
 //router
@@ -56,11 +61,17 @@ const WorkSpace:FC = () => {
   const { data : userData, error, mutate } = useSWR<IUser>('/api/users', fetcher);
   const { data : channelData, error:channelDataError, mutate: channelDataMutate } = useSWR<IChannel[]>(userData ? `/api/workspaces/${params?.workspace}/channels` : null,
   fetcher);
+  const { data:memberListData, mutate: revalidateMember } = useSWR<IUser[]>(
+    userData ? `/api/workspaces/${params?.workspace}/members` : null,
+    fetcher,
+  );
+
+  console.log('workspaceIndex member list', memberListData);
   const [isProfileModal, setIsProfileModal] = useState(false);
   const [isAddWorkSpaceModal, setIsAddWorkSpaceModal] = useState(false);
   const [isAddChannelModal, setIsAddChannelModal] = useState(false);
-
-  console.log('WorkSpace', channelData);
+  const [isOptionModal, setIsOptionModal] = useState(false);
+  const [showInviteWorkspaceModal, setShowInviteWorkspaceModal] = useState(false);
 
   const onModal = useCallback(() => {
     setIsProfileModal((prev)=> !prev);
@@ -76,12 +87,19 @@ const WorkSpace:FC = () => {
     setIsAddWorkSpaceModal(false);
   }, []);
 
-  const onIsAddChannelModal = useCallback(() => {
-    setIsAddChannelModal((prev)=> !prev);
+  const onIsOptionModal = useCallback(() => {
+    setIsOptionModal((prev)=> !prev);
   }, []);
-  const onIsAddChannelModalClose = useCallback(() => {
+  const onIsOptionModalClose = useCallback(() => {
+    setIsOptionModal(false);
+  }, []);
+
+  const setCloseAllModal = () => {
+    setIsOptionModal(false);
     setIsAddChannelModal(false);
-  }, []);
+    setIsAddWorkSpaceModal(false);
+    setShowInviteWorkspaceModal(false);
+  }
 
   const onLogout = useCallback(() => {
     axios.post('/api/users/logout', null, {
@@ -138,12 +156,27 @@ const WorkSpace:FC = () => {
         );
       })}
       <AddButton onClick={onIsAddWorkSpaceModal}>+</AddButton>
+      
       </WorkspaceList>
       <Channels>
-        <WorkspaceName>
+        <WorkspaceName onClick={onIsOptionModal}>
           <span>CN: {userData?.Workspaces.find((v) => v.url === params?.workspace)?.name}</span>
-          <AddButton onClick={onIsAddChannelModal}>+</AddButton>
-        </WorkspaceName>
+          {/* <RightCenterButton as='span'> */}
+            <BsFillCaretDownFill />
+          {/* </RightCenterButton> */}
+          </WorkspaceName>
+          {
+            isOptionModal && (
+              <Menu onModalClose={onIsOptionModalClose} style={{ top: '100px',left:'7px'}}>
+                <WorkspaceModal>
+                  <h2>{userData?.Workspaces.find((v) => v.url === params?.workspace)?.name}</h2>
+                  <button onClick={()=>setIsAddChannelModal(true)}>채널 만들기</button>
+                  <button onClick={()=>setShowInviteWorkspaceModal(true)}>{userData?.Workspaces.find((v) => v.url === params?.workspace)?.name} 워크스페이스에 사용자 초대</button>
+                  <button onClick={onLogout}>로그아웃</button>
+                </WorkspaceModal>
+              </Menu>
+            )
+          }
 
         <MenuScroll>
           {/* api channel S */}
@@ -168,11 +201,19 @@ const WorkSpace:FC = () => {
     }
     {
       isAddChannelModal && (
-        <Modal onModalClose={onIsAddChannelModalClose}>
-          <NewChannelForm onModalClose={onIsAddChannelModalClose}/>
+        <Modal onModalClose={setCloseAllModal}>
+          <NewChannelForm onModalClose={setCloseAllModal}/>
         </Modal>
       )
     }
+    {
+      showInviteWorkspaceModal && (
+        <Modal onModalClose={setCloseAllModal}>
+          <AddMemberForm onModalClose={setCloseAllModal}/>
+        </Modal>
+      )
+    }
+    
   </>
   )
 }

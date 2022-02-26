@@ -4,7 +4,7 @@ import React, { FC, CSSProperties } from 'react';
 import { CreateMenu, CloseModalButton } from './style';
 
 interface IProps {
-  isModal: boolean,
+  isModal?: boolean,
   onModalClose: () => void,
   style: CSSProperties,
 }
