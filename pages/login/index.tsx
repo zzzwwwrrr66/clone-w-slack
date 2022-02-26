@@ -18,7 +18,7 @@ import { Link, Redirect } from 'react-router-dom';
 
 
 const Login = () => {
-  const { data, error, mutate } = useSWR('/api/users', fetcher);
+  const { data: userData, error, mutate } = useSWR('/api/users', fetcher);
   
   const testData = useSWR('test');
   console.log('login page test data', testData.data)
@@ -49,15 +49,15 @@ const Login = () => {
     [email, password],
   );
 
-  if(data === undefined) {
+  if(userData === undefined) {
     return (
       <h2>loading...</h2>
     )
   }
 
-  if(data) {
+  if(userData && !error) {
     return (
-      <Redirect exact to='/workspace/channel' from='/login'></Redirect>
+      <Redirect to="/workspace/sleact/channel/일반" />
     )
   }
 

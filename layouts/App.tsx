@@ -21,8 +21,7 @@ const App = () => {
       <Redirect exact to='/login' from='/'></Redirect>
       <Route path={`/signup`} component={SignUp}></Route>
       <Route path={`/login`} component={LogIn}></Route>
-      <Route path={`/workspace`} component={WorkSpace}></Route>
-      {/* <Route exact path={`/workspace/dm`} component={DirectMassege}></Route> */}
+      <Route path={`/workspace/:workspace`} component={WorkSpace}></Route>
     </Switch>
   </BrowserRouter>
   )    
