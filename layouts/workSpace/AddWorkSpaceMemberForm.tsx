@@ -21,7 +21,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import fetcher from '@utils/fetcher';
 
 
-const AddMemberForm:FC<IProps> = ({onModalClose}) => {
+const AddWorkSpaceMemberForm:FC<IProps> = ({onModalClose}) => {
   const [email, onChangeEmail, setEmail] = useInput('');
   const { workspace } = useParams<IParams>();
   const { data: userData } = useSWR<IUser | false>('/api/users', fetcher);
@@ -67,4 +67,4 @@ const AddMemberForm:FC<IProps> = ({onModalClose}) => {
     </form>
   )
 }
-export default AddMemberForm;
+export default AddWorkSpaceMemberForm;
