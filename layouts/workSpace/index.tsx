@@ -47,8 +47,9 @@ import Menu from "@components/menu";
 import Modal from "@components/modal";
 import NewWorkspaceForm from '@layouts/workSpace/NewWorkspaceForm';
 import NewChannelForm from '@layouts/workSpace/NewChannelForm';
-import AddMemberForm from '@layouts/workSpace/AddMemberForm'
+import AddMemberForm from '@layouts/workSpace/AddWorkSpaceMemberForm'
 import ChannelList from "@components/channelList";
+import DmList from "@components/dmList";
 
 //router
 import { Switch, Route, Redirect, useParams } from "react-router";
@@ -61,7 +62,7 @@ const WorkSpace:FC = () => {
   const { data : userData, error, mutate } = useSWR<IUser>('/api/users', fetcher);
   const { data : channelData, error:channelDataError, mutate: channelDataMutate } = useSWR<IChannel[]>(userData ? `/api/workspaces/${params?.workspace}/channels` : null,
   fetcher);
-  const { data:memberListData, mutate: revalidateMember } = useSWR<IUser[]>(
+  const { data: memberListData, mutate: revalidateMember } = useSWR<IUser[]>(
     userData ? `/api/workspaces/${params?.workspace}/members` : null,
     fetcher,
   );
@@ -179,9 +180,8 @@ const WorkSpace:FC = () => {
           }
 
         <MenuScroll>
-          {/* api channel S */}
           <ChannelList/>
-          {/* api channel E */}
+          <DmList/>
         </MenuScroll>
       </Channels>
       <Chats>
