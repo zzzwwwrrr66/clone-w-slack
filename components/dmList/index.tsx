@@ -1,5 +1,5 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useSWR from "swr";
 import fetcher from "@utils/fetcher";
 
@@ -9,6 +9,9 @@ import { Link } from  "react-router-dom";
 
 //icons 
 import { BiCaretDown, BiCaretUp } from "react-icons/bi";
+
+//utils 
+import useSocket from '@hooks/useSocket';
 
 interface IParams {
   workspace: string,
@@ -28,6 +31,16 @@ const DmList = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   console.log('DM list component', memberListData);
+
+
+  useEffect(()=> {
+    // const [socket, disconnect] = useSocket(params?.workspace);
+    console.log();
+    return () => {
+      // disconnect();
+    }
+  }, [params]);
+
 
   const handleIsOpen = () => {
     setIsOpen(prev => !prev);
@@ -50,7 +63,7 @@ const DmList = () => {
         {memberListData?.map((v, i)=>{
           return (
             <div key={v.id}>
-            <Link to={`/workspace/${params?.workspace}/dm/${i}`}>
+            <Link to={`/workspace/${params?.workspace}/dm/${v.id}`}>
               {v.nickname}
               {
                 userData.id === v.id ? (' (me)') : (null)

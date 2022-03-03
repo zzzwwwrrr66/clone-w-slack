@@ -2,7 +2,7 @@ import React, {FC, useEffect} from 'react'
 
 //api
 import axios from 'axios';
-import useSWR ,{SWRResponse}from 'swr';
+import useSWR from 'swr';
 import fetcher from '@utils/fetcher';
 import testFetcher from '@utils/testFetcher';
 
