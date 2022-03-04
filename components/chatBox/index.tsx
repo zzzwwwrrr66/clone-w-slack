@@ -31,26 +31,12 @@ const ChatBox = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [onlineList, setOnlineList] = useState<number[]>([]);
   // const [socket] = useSocket(params?.workspace);
-  const [socket] = useSocket(params?.workspace);
 
   useEffect(() => {
     if (textareaRef.current) {
       autosize(textareaRef.current);
     }
   }, []);
-
-  useEffect(() => {
-    socket?.on('hello', (data: string) => {
-      console.log('chatBox socket test',data);
-    });
-    // socket?.on('dm', onMessage);
-    // console.log('socket on dm', socket?.hasListeners('dm'), socket);
-    return () => {
-      // socket?.off('dm', onMessage);
-      // console.log('socket off dm', socket?.hasListeners('dm'));
-      socket?.off('hello');
-    };
-  }, [socket]);
 
   const onSend = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

@@ -13,6 +13,9 @@ import { BiCaretDown, BiCaretUp } from "react-icons/bi";
 //utils 
 import useSocket from '@hooks/useSocket';
 
+// styles 
+import {IdTxt} from './style';
+
 interface IParams {
   workspace: string,
 }
@@ -29,17 +32,23 @@ const DmList = () => {
   );
 
   const [isOpen, setIsOpen] = useState(false);
+  const [onlineList, setOnlineList] = useState<number[]>([]);
 
-  console.log('DM list component', memberListData);
+  const [socket] = useSocket(params?.workspace);
 
-
-  useEffect(()=> {
-    // const [socket, disconnect] = useSocket(params?.workspace);
-    console.log();
+  useEffect(() => {
+    socket?.on('onlineList', (data: number[]) => {
+      setOnlineList(data);
+    });
+    // socket?.on('dm', onMessage);
+    // console.log('socket on dm', socket?.hasListeners('dm'), socket);
     return () => {
-      // disconnect();
-    }
-  }, [params]);
+      // socket?.off('dm', onMessage);
+      // console.log('socket off dm', socket?.hasListeners('dm'));
+      socket?.off('onlineList');
+    };
+  }, [socket]);
+ 
 
 
   const handleIsOpen = () => {
@@ -64,10 +73,9 @@ const DmList = () => {
           return (
             <div key={v.id}>
             <Link to={`/workspace/${params?.workspace}/dm/${v.id}`}>
-              {v.nickname}
+              <IdTxt className={onlineList.includes(v.id) ? 'active' : ''}>{v.nickname}</IdTxt>
               {
                 userData.id === v.id ? (' (me)') : (null)
-              
               }
             </Link>
             </div>

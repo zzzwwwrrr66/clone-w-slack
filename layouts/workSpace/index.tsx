@@ -1,4 +1,4 @@
-import React, { Children, FC, useState, VFC, useCallback } from "react";
+import React, { Children, FC, useState, VFC, useCallback, useEffect } from "react";
 
 //types
 import {IUser, IChannel} from '@typings/db';
@@ -55,10 +55,13 @@ import DmList from "@components/dmList";
 import { Switch, Route, Redirect, useParams } from "react-router";
 import { Link } from "react-router-dom";
 
+//websocket
+import useSocket from '@hooks/useSocket';
 
 const WorkSpace:FC = () => {
   const params = useParams<IParams>();
-  console.log(params?.workspace);
+  const [socket, disconnect] = useSocket(params?.workspace);
+
   const { data : userData, error, mutate } = useSWR<IUser>('/api/users', fetcher);
   const { data : channelData, error:channelDataError, mutate: channelDataMutate } = useSWR<IChannel[]>(userData ? `/api/workspaces/${params?.workspace}/channels` : null,
   fetcher);
@@ -67,12 +70,26 @@ const WorkSpace:FC = () => {
     fetcher,
   );
 
-  console.log('workspaceIndex member list', memberListData);
   const [isProfileModal, setIsProfileModal] = useState(false);
   const [isAddWorkSpaceModal, setIsAddWorkSpaceModal] = useState(false);
   const [isAddChannelModal, setIsAddChannelModal] = useState(false);
   const [isOptionModal, setIsOptionModal] = useState(false);
   const [showInviteWorkspaceModal, setShowInviteWorkspaceModal] = useState(false);
+
+  useEffect(() => {
+    if (channelData && userData && socket) {
+      console.log(socket);
+      socket.emit('login', { id: userData.id, channels: channelData.map((v) => v.id) });
+      
+    }
+  }, [socket, channelData, userData]);
+
+
+  useEffect(() => {
+    return () => {
+      disconnect();
+    };
+  }, [params?.workspace, disconnect]);
 
   const onModal = useCallback(() => {
     setIsProfileModal((prev)=> !prev);
