@@ -34,7 +34,6 @@ const NewChannelForm:FC<IProps> = ({onModalClose}) => {
   const onCreateChannel = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if(newChannelName && newChannelName.trim()) {
-      console.log('NewChannelForm', newChannelName);
 
       axios.post(`/api/workspaces/${workspace}/channels`, {name:newChannelName})
       .then((res)=>{

@@ -17,6 +17,8 @@ import { useState } from "react";
 //icons 
 import { BiCaretDown, BiCaretUp } from "react-icons/bi";
 
+
+
 const ChannelList = () => {
   const params = useParams<IParams>();
   const { data : userData, error, mutate } = useSWR<IUser>('/api/users', fetcher);
@@ -24,11 +26,11 @@ const ChannelList = () => {
   fetcher);
   const [isOpen, setIsOpen] = useState(true);
 
-  console.log('channel list component', channelData);
-
   const handleIsOpen = () => {
     setIsOpen(prev => !prev);
   }
+
+  
 
   return (
     <>

@@ -26,7 +26,6 @@ const NewWorkspaceForm:FC<IProps> = ({onModalClose}) => {
       console.log('NewWorkspaceForm submit!', newWorkspace, newUrl);
       axios.post('/api/workspaces', {workspace:newWorkspace, url:newUrl})
       .then((res)=>{
-        console.log('NewWorkspaceForm SUCCESS', res);
         mutate('/api/users');
         onModalClose();
         onChangeNewWorkspace('');
