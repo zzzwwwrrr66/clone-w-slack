@@ -9,8 +9,8 @@ resultObj = {
 } 
 */
 // resultObj[key] = [1,2,3,4,5]
-export default function useDateChat(objData: (IDM | IChat)[]) {
-  const resultObj: { [key: string]: (IDM | IChat)[] } = {};
+export default function useDateChat(objData: IDM[]) {
+  const resultObj: { [key: string]: IDM[] } = {};
   objData?.forEach((v) => {
     const day = dayjs(v.createdAt).format('YYYY-MM-DD');
     if(resultObj[day] !== undefined) {

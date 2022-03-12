@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, forwardRef } from 'react';
 
 // websocket 
 import useSocket from '@hooks/useSocket';
@@ -11,9 +11,6 @@ import {IDM, IUser, IChat} from '@typings/db';
 import useSWR, { useSWRInfinite } from 'swr';
 import fetcher from '@utils/fetcher';
 
-// css 
-import { ChatListWrap } from './style';
-
 // utils
 import dayjs from 'dayjs';
 import { Scrollbars } from 'react-custom-scrollbars';
@@ -21,60 +18,72 @@ import { Scrollbars } from 'react-custom-scrollbars';
 // customHooks 
 import useDateChat from '@hooks/useDateChat';
 
-const DmChatList = () => {
-  const { data : userData, error, mutate } = useSWR<IUser>('/api/users', fetcher);
+// components 
+import Chats from '@components/chats';
+
+//css 
+import { StickyHeader } from './style';
+import { ChatZone, Section } from '@components/chats/style';
+
+const DmChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
   const {workspace: workspaceParam, dm: dmParam} = useParams<{workspace: string, dm: string}>()
-  // const [socket] = useSocket(workspaceParam);
-  // const [chatList, setChatList] = useState<IDM>();
   const { data: chatData, mutate: mutateChat, revalidate, setSize } = useSWRInfinite<IDM[]>(
     (index) => `/api/workspaces/${workspaceParam}/dms/${dmParam}/chats?perPage=20&page=${index + 1}`,
     fetcher,
   );
+  const isEmpty = chatData?.[0]?.length === 0;
+  const isReachingEnd = isEmpty || (chatData && chatData[chatData.length - 1]?.length < 20) || false;
 
-  const scrollBarsRef = useRef(null)
-
-  useEffect(() => {
-    if(scrollBarsRef) console.log(scrollBarsRef.current);
-    return () => {
-    }
-  }, [scrollBarsRef]);
-
-  const onScroll = useCallback(
-    (e) => {
+  const onScroll = useCallback( (values) => {
+      if(values.scrollTop === 0 && !isReachingEnd) {
+        // setsize 로 이차원배열로 chatData 를 업데이팅
+        setSize((prevSize) => prevSize + 1).then(() => {
+          // 스크롤 위치 유지
+          const current = (scrollRef as React.MutableRefObject<Scrollbars>)?.current;
+          if (current) {
+            // 지금 스크롤 위치 알아내는 방법 current.getScrollHeight() - values.scrollHeight
+            current.scrollTop(current.getScrollHeight() - values.scrollHeight); 
+          }
+        });
+      };
     },
-    [scrollBarsRef],
+    [scrollRef, chatData],
   )
 
   const onChatDelete = (id) => () => {
     console.log('onChatDelete', id)
   }
 
+  const chatSections = useDateChat(
+    chatData ? 
+    ([] as IDM[]).concat(...chatData).flat().reverse() : 
+    []
+  );
   
   return (
-    <Scrollbars className={`chatListWrap`} autoHide ref={scrollBarsRef} onScroll={onScroll}>
-    {
-      chatData && chatData?.[0].reverse().map(v=> {
-        return (
-          <div style={{border: '1px solid'}}>
-            <ChatListWrap>
-            <div>
-              <span>{v.Sender.nickname}</span><br/>
-              <span>{v.createdAt}</span>
-            </div>
-            {
-              userData.id === v.SenderId && <div><button onClick={onChatDelete(v.id)}>Delete</button></div>
-            }
-            </ChatListWrap>
-            <div>
-              <span>{v.content}</span>
-              
-            </div>
-          </div>
-        )
-      })
-    }
-    </Scrollbars>
+    <ChatZone>
+    <Scrollbars className={`chatListWrap`} autoHide ref={scrollRef} onScrollFrame={onScroll}>
+        {
+          Object.entries(chatSections).map(([key, chats]) => {
+            return ((
+              <div key={key}>
+              <Section>
+                <StickyHeader><button>{key}</button></StickyHeader>
+                {
+                  chats.map((chat, i) => {
+                    return (((
+                      <Chats chat={chat} key={i}/>
+                    )))
+                  })
+                }
+              </Section>
+              </div>
+            ))
+          })
+        }
+      </Scrollbars>
+    </ChatZone>
   )
-}
+});
 
 export default DmChatList;
