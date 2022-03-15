@@ -18,7 +18,7 @@ import DmChatList from '@components/dmChatList';
 import useInput from '@hooks/useInput';
 
 // types 
-import { IUser } from '@typings/db';
+import { IUser, IChat } from '@typings/db';
 
 // css 
 import {Container, Header, DragOver} from './style';
@@ -30,9 +30,13 @@ import gravatar from 'gravatar';
 import { IDM } from '@typings/db'; 
 import Scrollbars from 'react-custom-scrollbars';
 
+//websocket
+import useSocket from '@hooks/useSocket';
+
 
 const DirectMassege:FC = ({children}) => {
   const {workspace: workspaceParam, dm: dmParam} = useParams<{workspace: string, dm: string}>()
+  const [socket, disconnect] = useSocket(workspaceParam);
   const { data:meData, error:meError, mutate: meMutate } = useSWR('/api/users', fetcher);
 
   const {data: currectUserData} = useSWR<IUser>(`/api/workspaces/${workspaceParam}/users/${dmParam}`)
@@ -56,7 +60,34 @@ const DirectMassege:FC = ({children}) => {
         scrollbarRef.current?.scrollToBottom();
       }, 100);
     }
-  }, [chatData]);
+  }, []);
+
+  useEffect(() => {
+    socket.on('dm', onDm);
+    return () => {
+      socket?.off('dm', onDm);
+    };
+  }, [socket]);
+
+  const onDm = (socketDmData:IDM) => {
+    // Other to me message
+    if (socketDmData.SenderId === Number(dmParam) && meData.id !== Number(dmParam)){
+      mutateChat((chatData)=>{
+        chatData?.[0].unshift(socketDmData)
+        return chatData
+      }, false)
+      .then(()=>{
+        if(scrollbarRef.current) {
+          if(
+            scrollbarRef.current.getScrollHeight() <
+            scrollbarRef.current.getClientHeight() + scrollbarRef.current.getScrollTop() + 150
+          ) {
+            scrollbarRef.current?.scrollToBottom();
+          }
+        }
+      })
+    }
+  }
 
 
   const onChathange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,10 +96,11 @@ const DirectMassege:FC = ({children}) => {
 
   const onSend = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if(chat !== '') {
-      axios
-      .post(`/api/workspaces/${workspaceParam}/dms/${dmParam}/chats`, {
-        content: chat,
+    if(chatData && chat.trim() !== '') {
+      const savedChat = chat;
+
+      axios.post(`/api/workspaces/${workspaceParam}/dms/${dmParam}/chats`, {
+        content: savedChat,
       })
       .then((res)=>{
         setChat('');
@@ -84,13 +116,11 @@ const DirectMassege:FC = ({children}) => {
       <h2>loading...</h2>
     )
   }
-
   if(!meData) {
     return (
       <Redirect exact to='/login' from='/workspace/channel'/>
     )
   }
-
   return(
     <>
     <Container>
