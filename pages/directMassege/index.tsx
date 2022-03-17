@@ -71,7 +71,7 @@ const DirectMassege:FC = ({children}) => {
 
   const onDm = (socketDmData:IDM) => {
     // Other to me message
-    if (socketDmData.SenderId === Number(dmParam) && meData.id !== Number(dmParam)){
+    if (socketDmData.SenderId === Number(dmParam) && meData.id !== Number(dmParam)) {
       mutateChat((chatData)=>{
         chatData?.[0].unshift(socketDmData)
         return chatData
