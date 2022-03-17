@@ -25,7 +25,7 @@ import Chats from '@components/chats';
 import { StickyHeader } from './style';
 import { ChatZone, Section } from '@components/chats/style';
 
-const DmChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
+const ChannelChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
   const {workspace: workspaceParam, dm: dmParam} = useParams<{workspace: string, dm: string}>()
   const { data: chatData, mutate: mutateChat, revalidate, setSize } = useSWRInfinite<IDM[]>(
     (index) => `/api/workspaces/${workspaceParam}/dms/${dmParam}/chats?perPage=20&page=${index + 1}`,
@@ -86,4 +86,4 @@ const DmChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
   )
 });
 
-export default DmChatList;
+export default ChannelChatList;
