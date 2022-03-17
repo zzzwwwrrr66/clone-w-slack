@@ -49,7 +49,7 @@ const CommonChatBox:VFC<IProps> = ({onSubmitForm, chat, onChangeChat}) => {
         e.preventDefault();
         onSubmitForm(e);
     }
-  }, []);
+  }, [chat]);
 
   const renderSuggestion = useCallback(
     (

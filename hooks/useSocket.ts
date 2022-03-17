@@ -5,7 +5,6 @@ const backUrl = 'http://localhost:3095';
 
 const sockets: { [key: string]: SocketIOClient.Socket } = {};
 const useSocket = (workspace?: string): [SocketIOClient.Socket | undefined, () => void] => {
-  console.log('rerendered in useSockets ', workspace)
   const disconnect = useCallback(() => {
     if (workspace) {
       sockets[workspace].disconnect();

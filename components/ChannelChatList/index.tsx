@@ -19,16 +19,16 @@ import { Scrollbars } from 'react-custom-scrollbars';
 import useDateChat from '@hooks/useDateChat';
 
 // components 
-import Chats from '@components/chats';
+import ChannelChats from '@components/channelChats';
 
 //css 
 import { StickyHeader } from './style';
 import { ChatZone, Section } from '@components/chats/style';
 
 const ChannelChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
-  const {workspace: workspaceParam, dm: dmParam} = useParams<{workspace: string, dm: string}>()
-  const { data: chatData, mutate: mutateChat, revalidate, setSize } = useSWRInfinite<IDM[]>(
-    (index) => `/api/workspaces/${workspaceParam}/dms/${dmParam}/chats?perPage=20&page=${index + 1}`,
+  const {workspace: workspaceParam, channel: channelParam} = useParams<{workspace: string, channel: string}>()
+  const { data: chatData, mutate: mutateChat, revalidate, setSize } = useSWRInfinite<IChat[]>(
+    (index) => `/api/workspaces/${workspaceParam}/channels/${channelParam}/chats?perPage=20&page=${index + 1}`,
     fetcher,
   );
   const isEmpty = chatData?.[0]?.length === 0;
@@ -56,7 +56,7 @@ const ChannelChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
 
   const chatSections = useDateChat(
     chatData ? 
-    ([] as IDM[]).concat(...chatData).flat().reverse() : 
+    ([] as IChat[]).concat(...chatData).flat().reverse() : 
     []
   );
   
@@ -72,7 +72,7 @@ const ChannelChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
                 {
                   chats.map((chat, i) => {
                     return (((
-                      <Chats chat={chat} key={i}/>
+                      <ChannelChats chat={chat} key={i}/>
                     )))
                   })
                 }

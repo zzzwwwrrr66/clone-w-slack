@@ -1,9 +1,16 @@
 import styled from '@emotion/styled';
 
+export const ChatListWrap = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 20px;
+`;
+
 export const ChatZone = styled.div`
   width: 100%;
   display: flex;
   flex: 1;
+  flex-direction: column;
 `;
 
 export const Section = styled.section`

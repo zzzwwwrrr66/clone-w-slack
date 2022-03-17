@@ -1,10 +1,10 @@
-import React, {FC, useEffect, useState, useCallback} from 'react'
+import React, {FC, useEffect, useRef, useState, useCallback} from 'react'
+
 //api
 import axios from 'axios';
-import useSWR,{useSWRInfinite} from 'swr';
+import useSWR, { useSWRInfinite } from 'swr';
 import fetcher from '@utils/fetcher';
 import testFetcher from '@utils/testFetcher';
-
 
 // router
 import { Link, Redirect, useParams } from 'react-router-dom';
@@ -12,56 +12,130 @@ import { Link, Redirect, useParams } from 'react-router-dom';
 //components
 import WorkSpace from '@layouts/workSpace';
 import CommonChatBox from '@components/commonChatBox';
+import ChannelChatList from '@components/ChannelChatList';
+
+//custom hook
+import useInput from '@hooks/useInput';
 
 // types 
-import {IDM} from '@typings/db'
 
-const Channel:FC = () => {
-  const params = useParams<{workspace: string, channel: string}>()
-  const { data, error, mutate } = useSWR('/api/users', fetcher);
-  
-  const { data: chatData, mutate: mutateChat, revalidate, setSize } = useSWRInfinite<IDM[]>(
-    (index) => `/api/workspaces/${params?.workspace}/channels/${params?.channel}/chats?perPage=20&page=${index + 1}`,
+// css 
+import {Container, Header, DragOver} from './style';
+
+// utils 
+import gravatar from 'gravatar';
+
+// types 
+import { IDM, IChat } from '@typings/db'; 
+import Scrollbars from 'react-custom-scrollbars';
+
+//websocket
+import useSocket from '@hooks/useSocket';
+
+
+const Channel:FC = ({children}) => {
+  const {workspace: workspaceParam, channel: channelParam} = useParams<{workspace: string, channel: string}>()
+  const [socket, disconnect] = useSocket(workspaceParam);
+  const { data:meData, error:meError, mutate: meMutate } = useSWR('/api/users', fetcher);
+
+  // const {data: currectUserData} = useSWR<IUser>(`/api/workspaces/${workspaceParam}/users/${meData.}`)
+
+  const { data: chatData, mutate: mutateChat, revalidate, setSize } = useSWRInfinite<IChat[]>(
+    (index) => `/api/workspaces/${workspaceParam}/channels/${channelParam}/chats?perPage=20&page=${index + 1}`,
     fetcher,
-  );
+    );
+    
+  const scrollbarRef = useRef<Scrollbars>(null);
   const [chat, setChat] = useState('');
 
-  const onChangeChat = (v) => {
-    setChat(v.target.value);
+  useEffect(() => {
+    if(scrollbarRef) console.log(scrollbarRef.current);
+    return () => {
+    }
+  }, [scrollbarRef]);
+
+  useEffect(() => {
+    if (chatData?.length === 1) {
+      setTimeout(() => {
+        scrollbarRef.current?.scrollToBottom();
+      }, 100);
+    }
+  }, []);
+
+  useEffect(() => {
+    socket.on('message', onMssage);
+    return () => {
+      socket?.off('message', onMssage);
+    };
+  }, [socket]);
+
+  const onMssage = (socketChnnelMessageData:IChat) => {
+    // Other to me message
+    if (socketChnnelMessageData.UserId !== meData.id) {
+      mutateChat((chatData)=>{
+        chatData?.[0].unshift(socketChnnelMessageData)
+        return chatData
+      }, false)
+      .then(()=>{
+        if(scrollbarRef.current) {
+          if(
+            scrollbarRef.current.getScrollHeight() <
+            scrollbarRef.current.getClientHeight() + scrollbarRef.current.getScrollTop() + 150
+          ) {
+            scrollbarRef.current?.scrollToBottom();
+          }
+        }
+      })
+    }
   }
 
-  const onSubmitForm = useCallback((e: React.FormEvent<HTMLFormElement>) => {
+
+  const onChathange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setChat(e.target.value);
+  }
+
+  const onSend = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    if(chat !== '') {
-      axios
-      .post(`/api/workspaces/${params?.workspace}/channels/${params?.channel}/chats`, {
-        content: chat,
+    if(chatData && chat.trim() !== '') {
+      const savedChat = chat;
+
+      axios.post(`/api/workspaces/${workspaceParam}/channels/${channelParam}/chats`, {
+        content: savedChat,
       })
       .then((res)=>{
         setChat('');
         mutateChat();
+        scrollbarRef.current?.scrollToBottom();
       })
       .catch((err)=>{console.dir(err.responce)});
     }
   }, [chat]);
 
-  if(data === undefined) {
+  if(meData === undefined) {
     return (
       <h2>loading...</h2>
     )
   }
-
-  if(!data) {
+  if(!meData) {
     return (
       <Redirect exact to='/login' from='/workspace/channel'/>
     )
   }
-
   return(
     <>
-      <h1>HI {data?.nickname} CHANNEL</h1>
-      <CommonChatBox chat={chat} onChangeChat={onChangeChat} onSubmitForm={onSubmitForm}/>
+    <Container>
+      <Header>
+      <img src={gravatar.url(meData?.email, { s: '24px', d: 'retro' })} alt={meData?.nickname} />
+        <span>{meData?.nickname}</span>
+        {/* <span>{socketChnnelMessageData?. !== meData.id && `(me)`}</span> */}
+      </Header> 
+      <ChannelChatList ref={scrollbarRef}/>
+      <CommonChatBox 
+        onSubmitForm={onSend} 
+        onChangeChat={onChathange} 
+        chat={chat}
+      />
+    </Container>
     </>
   )
 }

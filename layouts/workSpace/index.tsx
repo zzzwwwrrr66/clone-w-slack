@@ -49,7 +49,7 @@ import NewWorkspaceForm from '@layouts/workSpace/NewWorkspaceForm';
 import NewChannelForm from '@layouts/workSpace/NewChannelForm';
 import AddMemberForm from '@layouts/workSpace/AddWorkSpaceMemberForm'
 import ChannelList from "@components/channelList";
-import DmList from "@components/dmList";
+import DmUserList from "@components/dmUserList";
 
 //router
 import { Switch, Route, Redirect, useParams } from "react-router";
@@ -198,7 +198,7 @@ const WorkSpace:FC = () => {
 
         <MenuScroll>
           <ChannelList/>
-          <DmList/>
+          <DmUserList/>
         </MenuScroll>
       </Channels>
       <Chats>
