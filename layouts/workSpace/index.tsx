@@ -43,13 +43,13 @@ const Channel = loadable(() => import('@pages/channel'));
 const DirectMassege = loadable(() => import('@pages/directMassege'));
 
 //components 
-import Menu from "@components/menu";
-import Modal from "@components/modal";
+import Menu from "@components/Menu";
+import Modal from "@components/Modal";
 import NewWorkspaceForm from '@layouts/workSpace/NewWorkspaceForm';
 import NewChannelForm from '@layouts/workSpace/NewChannelForm';
 import AddMemberForm from '@layouts/workSpace/AddWorkSpaceMemberForm'
-import ChannelList from "@components/channelList";
-import DmUserList from "@components/dmUserList";
+import ChannelList from "@components/ChannelList";
+import DmUserList from "@components/DmUserList";
 
 //router
 import { Switch, Route, Redirect, useParams } from "react-router";

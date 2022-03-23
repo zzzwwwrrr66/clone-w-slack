@@ -19,11 +19,11 @@ import { Scrollbars } from 'react-custom-scrollbars';
 import useDateChat from '@hooks/useDateChat';
 
 // components 
-import ChannelChats from '@components/channelChats';
+import CommonChats from '@components/CommonChats';
 
 //css 
 import { StickyHeader } from './style';
-import { ChatZone, Section } from '@components/chats/style';
+import { ChatZone, Section } from '@components/CommonChats/style';
 
 const ChannelChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
   const {workspace: workspaceParam, channel: channelParam} = useParams<{workspace: string, channel: string}>()
@@ -61,7 +61,7 @@ const ChannelChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
   );
   
   return (
-    <ChatZone>
+    <ChatZone >
     <Scrollbars className={`chatListWrap`} autoHide ref={scrollRef} onScrollFrame={onScroll}>
         {
           Object.entries(chatSections).map(([key, chats]) => {
@@ -72,7 +72,7 @@ const ChannelChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
                 {
                   chats.map((chat, i) => {
                     return (((
-                      <ChannelChats chat={chat} key={i}/>
+                      <CommonChats chat={chat} key={i}/>
                     )))
                   })
                 }

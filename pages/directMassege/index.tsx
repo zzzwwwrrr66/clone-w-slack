@@ -11,8 +11,8 @@ import { Link, Redirect, useParams } from 'react-router-dom';
 
 //components
 import WorkSpace from '@layouts/workSpace';
-import ChatBox from '@components/chatBox';
-import DmChatList from '@components/dmChatList';
+import CommonChatBox from '@components/CommonChatBox';
+import DmChatList from '@components/DmChatList';
 
 //custom hook
 import useInput from '@hooks/useInput';
@@ -105,7 +105,7 @@ const DirectMassege:FC = ({children}) => {
       .then((res)=>{
         setChat('');
         mutateChat();
-        scrollbarRef.current?.scrollToBottom();
+        setTimeout(()=>{scrollbarRef.current?.scrollToBottom();}, 50);
       })
       .catch((err)=>{console.dir(err.responce)});
     }
@@ -130,9 +130,9 @@ const DirectMassege:FC = ({children}) => {
         <span>{currectUserData?.id === meData?.id && `(me)`}</span>
       </Header> 
       <DmChatList ref={scrollbarRef}/>
-      <ChatBox 
-        onSend={onSend} 
-        onChathange={onChathange} 
+      <CommonChatBox 
+        onSubmitForm={onSend} 
+        onChangeChat={onChathange} 
         chat={chat}
       />
     </Container>

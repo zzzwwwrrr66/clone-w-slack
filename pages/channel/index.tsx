@@ -11,7 +11,7 @@ import { Link, Redirect, useParams } from 'react-router-dom';
 
 //components
 import WorkSpace from '@layouts/workSpace';
-import CommonChatBox from '@components/commonChatBox';
+import CommonChatBox from '@components/CommonChatBox';
 import ChannelChatList from '@components/ChannelChatList';
 
 //custom hook
@@ -105,7 +105,7 @@ const Channel:FC = ({children}) => {
       .then((res)=>{
         setChat('');
         mutateChat();
-        scrollbarRef.current?.scrollToBottom();
+        setTimeout(()=>{scrollbarRef.current?.scrollToBottom();}, 50);
       })
       .catch((err)=>{console.dir(err.responce)});
     }
