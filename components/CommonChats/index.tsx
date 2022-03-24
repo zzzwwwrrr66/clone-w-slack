@@ -54,33 +54,29 @@ const Chats: VFC<IProps> = ({chat}) => {
     return dayjs(chat.createdAt).format('YYYY-MM-DD')
   }, [workspace, chat.content]);
 
-  const handleIsDrag = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    console.log('isDrag!');
-    setIsDrag(true);
-  },[]);
+  // const handleIsDrag = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  //   e.preventDefault();
+  //   console.log('isDrag!');
+  //   setIsDrag(true);
+  // },[]);
 
-  const onDrop = useCallback( (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const formData = new FormData();
-    if(e.dataTransfer.items.length) {
-      for(let i = 0;i <  e.dataTransfer.items.length; i++) {
-        if (e.dataTransfer.items[i].kind === 'file') {
-          formData.append('image', e.dataTransfer.files[i]);
-          // console.log(formData);
-          // debugger
-        }
-      }
-    }
-    
-
-    
-
-    setIsDrag(false);
-  },[isDrag]);
+  // const onDrop = useCallback( (e: React.DragEvent<HTMLDivElement>) => {
+  //   e.preventDefault();
+  //   const formData = new FormData();
+  //   if(e.dataTransfer.items.length) {
+  //     for(let i = 0;i <  e.dataTransfer.items.length; i++) {
+  //       if (e.dataTransfer.items[i].kind === 'file') {
+  //         formData.append('image', e.dataTransfer.files[i]);
+  //         // console.log(formData);
+  //         debugger
+  //       }
+  //     }
+  //   }
+  //   setIsDrag(false);
+  // },[isDrag]);
 
   return (
-    <Section style={{ border: '1px solid red' }} onDragOver={handleIsDrag} onDrop={onDrop}>
+    <Section style={{ border: '1px solid red' }} >
       <ChatListWrap>
           <span>{user.nickname} / {user.email} / {chatCreateAt}</span><br />
       </ChatListWrap>

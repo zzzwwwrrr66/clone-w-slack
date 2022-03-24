@@ -24,6 +24,7 @@ import CommonChats from '@components/CommonChats';
 //css 
 import { StickyHeader } from './style';
 import { ChatZone, Section } from '@components/CommonChats/style';
+import axios from 'axios';
 
 const ChannelChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
   const {workspace: workspaceParam, dm: dmParam} = useParams<{workspace: string, dm: string}>()
@@ -33,6 +34,9 @@ const ChannelChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
   );
   const isEmpty = chatData?.[0]?.length === 0;
   const isReachingEnd = isEmpty || (chatData && chatData[chatData.length - 1]?.length < 20) || false;
+
+  const [isDrag, setIsDrag] = useState(false);
+  const current = (scrollRef as React.MutableRefObject<Scrollbars>)?.current;
 
   const onScroll = useCallback( (values) => {
       if(values.scrollTop === 0 && !isReachingEnd) {
@@ -47,12 +51,40 @@ const ChannelChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
         });
       };
     },
-    [scrollRef, chatData],
-  )
+    [current, chatData],
+  );
 
-  const onChatDelete = (id) => () => {
-    console.log('onChatDelete', id)
-  }
+  // drag and drop update Image S
+  const handleIsDrag = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    console.log('isDrag!');
+    setIsDrag(true);
+  },[]);
+
+  const onDrop = useCallback( (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+
+    setIsDrag(false);
+
+    const formData = new FormData();
+    if(e.dataTransfer.items.length) {
+      for(let i = 0;i <  e.dataTransfer.items.length; i++) {
+        if (e.dataTransfer.items[i].kind === 'file') {
+          formData.append('image', e.dataTransfer.files[i]);
+        }
+      }
+      axios.post(`api/workspaces/${workspaceParam}/dms/${dmParam}/images`, formData)
+      .then(res=> {
+        console.log('image update success', res);
+        mutateChat();
+        setIsDrag(false);
+        current.scrollToBottom();
+      })
+      .catch(err => console.error(err))
+    }
+    
+  },[current, workspaceParam, dmParam]);
+  // drag and drop update Image E
 
   const chatSections = useDateChat(
     chatData ? 
@@ -61,7 +93,7 @@ const ChannelChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
   );
   
   return (
-    <ChatZone>
+    <ChatZone onDragOver={handleIsDrag} onDrop={onDrop}>
     <Scrollbars className={`chatListWrap`} autoHide ref={scrollRef} onScrollFrame={onScroll}>
         {
           Object.entries(chatSections).map(([key, chats]) => {

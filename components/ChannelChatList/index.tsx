@@ -14,6 +14,7 @@ import fetcher from '@utils/fetcher';
 // utils
 import dayjs from 'dayjs';
 import { Scrollbars } from 'react-custom-scrollbars';
+import axios from 'axios';
 
 // customHooks 
 import useDateChat from '@hooks/useDateChat';
@@ -25,6 +26,7 @@ import CommonChats from '@components/CommonChats';
 import { StickyHeader } from './style';
 import { ChatZone, Section } from '@components/CommonChats/style';
 
+
 const ChannelChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
   const {workspace: workspaceParam, channel: channelParam} = useParams<{workspace: string, channel: string}>()
   const { data: chatData, mutate: mutateChat, revalidate, setSize } = useSWRInfinite<IChat[]>(
@@ -33,13 +35,14 @@ const ChannelChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
   );
   const isEmpty = chatData?.[0]?.length === 0;
   const isReachingEnd = isEmpty || (chatData && chatData[chatData.length - 1]?.length < 20) || false;
+  const [isDrag, setIsDrag] = useState(false);
+  const current = (scrollRef as React.MutableRefObject<Scrollbars>)?.current;
 
   const onScroll = useCallback( (values) => {
       if(values.scrollTop === 0 && !isReachingEnd) {
         // setsize 로 이차원배열로 chatData 를 업데이팅
         setSize((prevSize) => prevSize + 1).then(() => {
           // 스크롤 위치 유지
-          const current = (scrollRef as React.MutableRefObject<Scrollbars>)?.current;
           if (current) {
             // 지금 스크롤 위치 알아내는 방법 current.getScrollHeight() - values.scrollHeight
             current.scrollTop(current.getScrollHeight() - values.scrollHeight); 
@@ -49,10 +52,37 @@ const ChannelChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
     },
     [scrollRef, chatData],
   )
+  // drag and drop update Image S
+  const handleIsDrag = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    console.log('isDrag!');
+    setIsDrag(true);
+  },[]);
 
-  const onChatDelete = (id) => () => {
-    console.log('onChatDelete', id)
-  }
+  const onDrop = useCallback( (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+
+    setIsDrag(false);
+
+    const formData = new FormData();
+    if(e.dataTransfer.items.length) {
+      for(let i = 0;i <  e.dataTransfer.items.length; i++) {
+        if (e.dataTransfer.items[i].kind === 'file') {
+          formData.append('image', e.dataTransfer.files[i]);
+        }
+      }
+      axios.post(`api/workspaces/${workspaceParam}/channels/${channelParam}/images`, formData)
+      .then(res=> {
+        console.log('image update success', res);
+        mutateChat();
+        current.scrollToBottom();
+        setIsDrag(false);
+      })
+      .catch(err => console.error(err))
+    }
+    
+  },[current, workspaceParam, channelParam]);
+  // drag and drop update Image E
 
   const chatSections = useDateChat(
     chatData ? 
@@ -61,7 +91,7 @@ const ChannelChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
   );
   
   return (
-    <ChatZone >
+    <ChatZone onDragOver={handleIsDrag} onDrop={onDrop}>
     <Scrollbars className={`chatListWrap`} autoHide ref={scrollRef} onScrollFrame={onScroll}>
         {
           Object.entries(chatSections).map(([key, chats]) => {
