@@ -78,7 +78,6 @@ const WorkSpace:FC = () => {
 
   useEffect(() => {
     if (channelData && userData && socket) {
-      console.log(socket);
       socket.emit('login', { id: userData.id, channels: channelData.map((v) => v.id) });
       
     }
@@ -124,7 +123,6 @@ const WorkSpace:FC = () => {
       withCredentials: true,
     })
     .then((res)=>{
-      console.log('channel page', res)
       mutate();
     })
     .catch(err=>{

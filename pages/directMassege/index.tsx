@@ -49,12 +49,6 @@ const DirectMassege:FC = ({children}) => {
   const [chat, setChat] = useState('');
 
   useEffect(() => {
-    if(scrollbarRef) console.log(scrollbarRef.current);
-    return () => {
-    }
-  }, [scrollbarRef]);
-
-  useEffect(() => {
     if (chatData?.length === 1) {
       setTimeout(() => {
         scrollbarRef.current?.scrollToBottom();

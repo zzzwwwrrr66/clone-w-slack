@@ -16,6 +16,10 @@ import useSocket from '@hooks/useSocket';
 // styles 
 import {IdTxt} from './style';
 
+//components
+import EachDmUser from '@components/EachDmUser';
+
+
 interface IParams {
   workspace: string,
 }
@@ -71,19 +75,13 @@ const DmList = () => {
       <div>
         {memberListData?.map((v, i)=>{
           return (
-            <div key={v.id}>
-            <Link to={`/workspace/${params?.workspace}/dm/${v.id}`}>
-              <IdTxt className={onlineList.includes(v.id) ? 'active' : ''}>{v.nickname}</IdTxt>
-              {
-                userData.id === v.id ? (' (me)') : (null)
-              }
-            </Link>
-            </div>
+            <EachDmUser key={v.id} onlineList={onlineList} user={v} workspace={params?.workspace}/>
           )
         })}
     </div>
     ) : null
   }
+  
     </>  
   )
 }

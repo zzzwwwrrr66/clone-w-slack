@@ -26,7 +26,7 @@ import {Container, Header, DragOver} from './style';
 import gravatar from 'gravatar';
 
 // types 
-import { IDM, IChat } from '@typings/db'; 
+import { IDM, IChat, IUser } from '@typings/db'; 
 import Scrollbars from 'react-custom-scrollbars';
 
 //websocket
@@ -43,16 +43,18 @@ const Channel:FC = ({children}) => {
   const { data: chatData, mutate: mutateChat, revalidate, setSize } = useSWRInfinite<IChat[]>(
     (index) => `/api/workspaces/${workspaceParam}/channels/${channelParam}/chats?perPage=20&page=${index + 1}`,
     fetcher,
-    );
-    
+  );
+
+  const time = localStorage.getItem(`${workspaceParam}-${channelParam}`);
+  const { data: userData } = useSWR<IUser>('/api/users', fetcher, {
+    dedupingInterval: 2000, // 2초
+  });
+  const { data: count, mutate } = useSWR<number>(
+    userData ? `/api/workspaces/${workspaceParam}/channels/${channelParam}/unreads?after=${time}` : null,
+    fetcher,
+  );
   const scrollbarRef = useRef<Scrollbars>(null);
   const [chat, setChat] = useState('');
-
-  useEffect(() => {
-    if(scrollbarRef) console.log(scrollbarRef.current);
-    return () => {
-    }
-  }, [scrollbarRef]);
 
   useEffect(() => {
     if (chatData?.length === 1) {
@@ -63,13 +65,13 @@ const Channel:FC = ({children}) => {
   }, []);
 
   useEffect(() => {
-    socket.on('message', onMssage);
+    socket.on('message', onMessage);
     return () => {
-      socket?.off('message', onMssage);
+      socket?.off('message', onMessage);
     };
   }, [socket]);
 
-  const onMssage = (socketChnnelMessageData:IChat) => {
+  const onMessage = (socketChnnelMessageData:IChat) => {
     // Other to me message
     if (socketChnnelMessageData.UserId !== meData.id) {
       mutateChat((chatData)=>{
@@ -106,6 +108,8 @@ const Channel:FC = ({children}) => {
         setChat('');
         mutateChat();
         setTimeout(()=>{scrollbarRef.current?.scrollToBottom();}, 50);
+        localStorage.setItem(`${workspaceParam}-${channelParam}`, new Date().getTime().toString());
+        mutate();
       })
       .catch((err)=>{console.dir(err.responce)});
     }

@@ -57,7 +57,6 @@ const ChannelChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
   // drag and drop update Image S
   const handleIsDrag = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    console.log('isDrag!');
     setIsDrag(true);
   },[]);
 

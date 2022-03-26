@@ -8,7 +8,7 @@ import { useParams } from 'react-router';
 
 // types 
 import {IDM, IUser, IChat} from '@typings/db';
-import useSWR, { useSWRInfinite } from 'swr';
+import useSWR, { useSWRInfinite, mutate } from 'swr';
 import fetcher from '@utils/fetcher';
 
 // utils
@@ -20,7 +20,7 @@ import axios from 'axios';
 import useDateChat from '@hooks/useDateChat';
 
 // components 
-import CommonChats from '@components/CommonChats';
+import CommonChats from '@components/CommonChats'; 
 
 //css 
 import { StickyHeader } from './style';
@@ -55,7 +55,6 @@ const ChannelChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
   // drag and drop update Image S
   const handleIsDrag = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    console.log('isDrag!');
     setIsDrag(true);
   },[]);
 
@@ -71,12 +70,14 @@ const ChannelChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
           formData.append('image', e.dataTransfer.files[i]);
         }
       }
+      // send a Image S
       axios.post(`api/workspaces/${workspaceParam}/channels/${channelParam}/images`, formData)
       .then(res=> {
         console.log('image update success', res);
         mutateChat();
         current.scrollToBottom();
         setIsDrag(false);
+        const time = new Date().getTime().toString();
       })
       .catch(err => console.error(err))
     }
@@ -89,6 +90,7 @@ const ChannelChatList = forwardRef<Scrollbars>(({}, scrollRef) =>{
     ([] as IChat[]).concat(...chatData).flat().reverse() : 
     []
   );
+  
   
   return (
     <ChatZone onDragOver={handleIsDrag} onDrop={onDrop}>

@@ -17,11 +17,14 @@ import { useState } from "react";
 //icons 
 import { BiCaretDown, BiCaretUp } from "react-icons/bi";
 
+// components 
+import EachChannelList from '@components/EachChannelList';
+
 
 
 const ChannelList = () => {
   const params = useParams<IParams>();
-  const { data : userData, error, mutate } = useSWR<IUser>('/api/users', fetcher);
+  const { data : userData, error, mutate: userDataMutate } = useSWR<IUser>('/api/users', fetcher);
   const { data : channelData, error:channelDataError, mutate: channelDataMutate } = useSWR<IChannel[]>(userData ? `/api/workspaces/${params?.workspace}/channels` : null,
   fetcher);
   const [isOpen, setIsOpen] = useState(true);
@@ -29,8 +32,6 @@ const ChannelList = () => {
   const handleIsOpen = () => {
     setIsOpen(prev => !prev);
   }
-
-  
 
   return (
     <>
@@ -48,11 +49,7 @@ const ChannelList = () => {
       <div>
       {channelData?.map((v, i)=>{
         return (
-          <div key={v.id}>
-          <Link to={`/workspace/${params?.workspace}/channel/${v.name}`}>
-            {v.name}
-          </Link>
-          </div>
+          <EachChannelList key={v.id} channel={v}/>
         )
       })}
       </div>

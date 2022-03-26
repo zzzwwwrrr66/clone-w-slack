@@ -23,7 +23,6 @@ const NewWorkspaceForm:FC<IProps> = ({onModalClose}) => {
     e.preventDefault();
     if(newWorkspace && newWorkspace.trim() && newUrl && newUrl.trim()) {
 
-      console.log('NewWorkspaceForm submit!', newWorkspace, newUrl);
       axios.post('/api/workspaces', {workspace:newWorkspace, url:newUrl})
       .then((res)=>{
         mutate('/api/users');

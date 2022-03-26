@@ -27,7 +27,7 @@ const Chats: VFC<IProps> = ({chat}) => {
 
   const result = useMemo(
     () =>
-      // uploads\\서버주소
+      // uploads\\서버주소 
       chat.content.startsWith('uploads\\') || chat.content.startsWith('uploads/') ? (
         <img src={`${BACK_URL}/${chat.content}`} style={{ maxHeight: 200 }} />
       ) : (
